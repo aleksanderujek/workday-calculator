@@ -49,7 +49,26 @@ decimal increment7 = 0.5m;
 var example7 = calendar.GetWorkdayIncrement(start7, increment7);
 PrintIncrement(start7, increment7, example7);
 
-var start8 = new DateTime(2004, 5, 24, 8, 0, 0);
-decimal increment8 = 2.75m;
+var start8 = new DateTime(2004, 5, 24, 14, 0, 0);
+decimal increment8 = 2.5m;
 var example8 = calendar.GetWorkdayIncrement(start8, increment8);
 PrintIncrement(start8, increment8, example8);
+
+
+calendar.SetWorkdayStartAndStop(8, 0, 20, 0);
+var start9 = new DateTime(2004, 5, 24, 19, 0, 0);
+decimal increment9 = 0.5m;
+var example9 = calendar.GetWorkdayIncrement(start9, increment9);
+PrintIncrement(start9, increment9, example9);
+
+calendar.SetWorkdayStartAndStop(8, 0, 20, 0);
+var start10 = new DateTime(2004, 5, 24, 22, 0, 0);
+decimal increment10 = 1.75m;
+var example10 = calendar.GetWorkdayIncrement(start10, increment10);
+PrintIncrement(start10, increment10, example10);
+
+calendar.SetWorkdayStartAndStop(8, 0, 16, 0);
+var start11 = new DateTime(2004, 5, 24, 9, 0, 0);
+decimal increment11 = -0.5m;
+var example11 = calendar.GetWorkdayIncrement(start11, increment11);
+PrintIncrement(start11, increment11, example11);
