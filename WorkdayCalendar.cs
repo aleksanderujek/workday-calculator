@@ -43,50 +43,38 @@ class WorkdayCalendar : IWorkdayCalendar
             throw new ArgumentException("Start date cannot be empty.");
         }
 
-        int workdayMinutes;
         if (StartTime == default || EndTime == default)
         {
             throw new InvalidOperationException("Workday start and stop times must be set before calculating workday increment.");
         }
-        else
-        {
-            ValidateStartTimeToEndTime(StartTime, EndTime);
-            workdayMinutes = (EndTime - StartTime).Hours * 60 + (EndTime - StartTime).Minutes;
-        }
 
+        ValidateStartTimeToEndTime(StartTime, EndTime);
+        int workdayMinutes = (EndTime - StartTime).Hours * 60 + (EndTime - StartTime).Minutes;
+
+        bool isPositiveIncrement = incrementInWorkdays > 0;
         decimal fraction = incrementInWorkdays % 1;
         decimal adjustedMinutes = workdayMinutes * fraction;
 
-        bool isPositiveIncrement = incrementInWorkdays > 0;
-
-        if (startDate.TimeOfDay < StartTime)
-        {
-            // If isPositiveIncrement is true, set startDate time as workday's StartTime.
-            // Otherwise, subtract one day from startDate and set time as workday's EndTime.
-            startDate = isPositiveIncrement ? startDate.Date.Add(StartTime) : startDate.Date.Add(EndTime).AddDays(-1);
-        }
-
-        if (startDate.TimeOfDay > EndTime)
-        {
-            // If isPositiveIncrement is true, add one day to startDate and set time as workday's StartTime.
-            // Otherwise, set startDate time as workday's EndTime.
-            startDate = isPositiveIncrement ? startDate.Date.Add(StartTime).AddDays(1) : startDate.Date.Add(EndTime);
-        }
+        startDate = AdjustStartDateBasedOnWorkHours(startDate, isPositiveIncrement);
 
         startDate = startDate.AddMinutes((int)adjustedMinutes);
 
         int workDays = Math.Abs((int)incrementInWorkdays);
-
         if (workDays == 0)
         {
+            // If increment is less than 1 workday, keep the time difference
+            startDate = AdjustStartDateBasedOnWorkHours(startDate, isPositiveIncrement, includeDifference: true);
             startDate = CalculateIncrement(startDate, isPositiveIncrement);
         }
-
-        int increment = isPositiveIncrement ? 1 : -1;
-        for (int i = 0; i < workDays; i++)
+        else
         {
-            startDate = CalculateIncrement(startDate.AddDays(increment), isPositiveIncrement);
+            int increment = isPositiveIncrement ? 1 : -1;
+            for (int i = 0; i < workDays; i++)
+            {
+                startDate = CalculateIncrement(startDate.AddDays(increment), isPositiveIncrement);
+            }
         }
+
 
         return startDate;
     }
@@ -209,6 +197,35 @@ class WorkdayCalendar : IWorkdayCalendar
             return true;
         }
         return false;
+    }
+
+
+    /// <summary>
+    /// Adjusts the start date for an increment based on the specified parameters.
+    /// </summary>
+    /// <param name="startDate">The start date to adjust.</param>
+    /// <param name="isPositiveIncrement">A boolean value indicating whether the increment is positive or negative.</param>
+    /// <param name="includeDifference">A boolean value indicating whether to include the time difference in the adjustment.</param>
+    /// <returns>The adjusted start date.</returns>
+    private DateTime AdjustStartDateBasedOnWorkHours(DateTime startDate, bool isPositiveIncrement, bool includeDifference = false)
+    {
+        TimeSpan difference = isPositiveIncrement ? startDate.TimeOfDay - EndTime : startDate.TimeOfDay - StartTime;
+        if (startDate.TimeOfDay < StartTime)
+        {
+            // If isPositiveIncrement is true, set startDate time as workday's StartTime.
+            // Otherwise, subtract one day from startDate and set time as workday's EndTime.
+            startDate = isPositiveIncrement ? startDate.Date.Add(StartTime) : startDate.Date.Add(EndTime).AddDays(-1);
+            startDate = includeDifference ? startDate.Subtract(difference) : startDate;
+        }
+
+        if (startDate.TimeOfDay > EndTime)
+        {
+            // If isPositiveIncrement is true, add one day to startDate and set time as workday's StartTime.
+            // Otherwise, set startDate time as workday's EndTime.
+            startDate = isPositiveIncrement ? startDate.Date.Add(StartTime).AddDays(1) : startDate.Date.Add(EndTime);
+            startDate = includeDifference ? startDate.Add(difference) : startDate;
+        }
+        return startDate;
     }
 
     /// <summary>
