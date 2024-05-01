@@ -48,3 +48,8 @@ var start7 = new DateTime(2004, 5, 24, 4, 0, 0);
 decimal increment7 = 0.5m;
 var example7 = calendar.GetWorkdayIncrement(start7, increment7);
 PrintIncrement(start7, increment7, example7);
+
+var start8 = new DateTime(2004, 5, 24, 8, 0, 0);
+decimal increment8 = 2.75m;
+var example8 = calendar.GetWorkdayIncrement(start8, increment8);
+PrintIncrement(start8, increment8, example8);
