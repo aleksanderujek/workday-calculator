@@ -1,41 +1,38 @@
 public interface IDayIncrementStrategy
 {
-    DateTime CalculcateNewWorkday(DateTime date, bool isAdding);
+    DateTime CalculcateNewWorkday(DateTime date, bool isPositiveIncrement);
 }
 
 public class SaturdayStrategy : IDayIncrementStrategy
 {
-    public DateTime CalculcateNewWorkday(DateTime date, bool isAdding)
+    public DateTime CalculcateNewWorkday(DateTime date, bool isPositiveIncrement)
     {
-        DateTime newDate = date.AddDays(isAdding ? 2 : -1);
-        //Console.WriteLine("It's Saturday. Adding 2 days: " + newDate.ToString("d"));
+        DateTime newDate = date.AddDays(isPositiveIncrement ? 2 : -1);
         return newDate;
     }
 }
 
 public class SundayStrategy : IDayIncrementStrategy
 {
-    public DateTime CalculcateNewWorkday(DateTime date, bool isAdding)
+    public DateTime CalculcateNewWorkday(DateTime date, bool isPositiveIncrement)
     {
-        DateTime newDate = date.AddDays(isAdding ? 1 : -2);
-        //Console.WriteLine("It's Sunday. Adding 1 day: " + newDate.ToString("d"));
+        DateTime newDate = date.AddDays(isPositiveIncrement ? 1 : -2);
         return newDate;
     }
 }
 
 public class HolidayStrategy : IDayIncrementStrategy
 {
-    public DateTime CalculcateNewWorkday(DateTime date, bool isAdding)
+    public DateTime CalculcateNewWorkday(DateTime date, bool isPositiveIncrement)
     {
-        DateTime newDate = date.AddDays(isAdding ? 1 : -1);
-        //Console.WriteLine("It's a holiday. Adding 1 day: " + newDate.ToString("d"));
+        DateTime newDate = date.AddDays(isPositiveIncrement ? 1 : -1);
         return newDate;
     }
 }
 
 public class DefaultStrategy : IDayIncrementStrategy
 {
-    public DateTime CalculcateNewWorkday(DateTime date, bool isAdding)
+    public DateTime CalculcateNewWorkday(DateTime date, bool isPositiveIncrement)
     {
         return date;
     }
