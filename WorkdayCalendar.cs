@@ -75,10 +75,7 @@ class WorkdayCalendar : IWorkdayCalendar
     /// <param name="date">The date to set as a holiday.</param>
     public void SetHoliday(DateTime date)
     {
-        if (date == DateTime.MinValue)
-        {
-            throw new ArgumentException("New holiday date cannot be empty.");
-        }
+        validator.ValidateDateTimeIfEmpty(date);
         holidays.Add(date);
     }
 
