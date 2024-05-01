@@ -7,6 +7,13 @@ class WorkdayCalendar : IWorkdayCalendar
     private TimeSpan StartTime;
     private TimeSpan EndTime;
 
+    /// <summary>
+    /// Sets the start and stop time for the workday.
+    /// </summary>
+    /// <param name="startHours">The hours component of the start time.</param>
+    /// <param name="startMinutes">The minutes component of the start time.</param>
+    /// <param name="stopHours">The hours component of the stop time.</param>
+    /// <param name="stopMinutes">The minutes component of the stop time.</param>
     public void SetWorkdayStartAndStop(int startHours, int startMinutes, int stopHours, int stopMinutes)
     {
         ValidateHour(startHours, "start");
@@ -26,6 +33,12 @@ class WorkdayCalendar : IWorkdayCalendar
         EndTime = endTime;
     }
 
+    /// <summary>
+    /// Calculates the date and time of a workday increment based on the start date and the number of workdays to increment.
+    /// </summary>
+    /// <param name="startDate">The start date of the increment.</param>
+    /// <param name="incrementInWorkdays">The number of workdays to increment.</param>
+    /// <returns>The date and time of the workday increment.</returns>
     public DateTime GetWorkdayIncrement(DateTime startDate, decimal incrementInWorkdays)
     {
         if (startDate == DateTime.MinValue)
@@ -81,6 +94,10 @@ class WorkdayCalendar : IWorkdayCalendar
         return startDate;
     }
 
+    /// <summary>
+    /// Sets a new holiday date in the workday calendar.
+    /// </summary>
+    /// <param name="date">The date to set as a holiday.</param>
     public void SetHoliday(DateTime date)
     {
         if (date == DateTime.MinValue)
@@ -90,6 +107,11 @@ class WorkdayCalendar : IWorkdayCalendar
         holidays.Add(date);
     }
 
+    /// <summary>
+    /// Sets a recurring holiday on the specified month and day.
+    /// </summary>
+    /// <param name="month">The month of the recurring holiday.</param>
+    /// <param name="day">The day of the recurring holiday.</param>
     public void SetRecurringHoliday(int month, int day)
     {
         if (month < 1 || month > 12)
@@ -117,6 +139,12 @@ class WorkdayCalendar : IWorkdayCalendar
     }
 
     #region Private Methods
+    /// <summary>
+    /// Checks if the specified month and day form a valid date.
+    /// </summary>
+    /// <param name="month">The month component of the date.</param>
+    /// <param name="day">The day component of the date.</param>
+    /// <returns><c>true</c> if the specified month and day form a valid date; otherwise <c>false</c>.</returns>
     private bool IsValidDate(int month, int day)
     {
         try
@@ -130,6 +158,11 @@ class WorkdayCalendar : IWorkdayCalendar
         }
     }
 
+    /// <summary>
+    /// Validates the specified hour and throws an exception if it is not within the valid range of 0 to 24.
+    /// </summary>
+    /// <param name="hour">The hour to validate.</param>
+    /// <param name="label">The label to include in the exception message.</param>
     private void ValidateHour(int hour, string label)
     {
         if (hour < 0 || hour > 24)
@@ -138,6 +171,11 @@ class WorkdayCalendar : IWorkdayCalendar
         }
     }
 
+    /// <summary>
+    /// Validates the specified minute and throws an exception if it is not within the valid range of 0 to 59.
+    /// </summary>
+    /// <param name="minute">The minute to validate.</param>
+    /// <param name="label">The label to include in the exception message.</param>
     private void ValidateMinute(int minute, string label)
     {
         if (minute < 0 || minute > 59)
@@ -146,6 +184,11 @@ class WorkdayCalendar : IWorkdayCalendar
         }
     }
 
+    /// <summary>
+    /// Checks if the specified date is a recurring holiday.
+    /// </summary>
+    /// <param name="dateTime">The date to check.</param>
+    /// <returns><c>true</c> if the specified date is a recurring holiday; otherwise <c>false</c>.</returns>
     private bool IsRecurringHoliday(DateTime dateTime)
     {
         int month = dateTime.Month;
@@ -158,7 +201,13 @@ class WorkdayCalendar : IWorkdayCalendar
         return false;
     }
 
-    private DateTime CalculateIncrement(DateTime dateTime, bool isAdding)
+    /// <summary>
+    /// Calculates the increment for the specified <see cref="DateTime"/> value.
+    /// </summary>
+    /// <param name="dateTime">The <see cref="DateTime"/> value to calculate the increment for.</param>
+    /// <param name="isPositiveIncrement">A boolean value indicating whether the increment is positive or negative.</param>
+    /// <returns>The incremented <see cref="DateTime"/> value.</returns>
+    private DateTime CalculateIncrement(DateTime dateTime, bool isPositiveIncrement)
     {
         IDayIncrementStrategy strategy = dateTime.DayOfWeek switch
         {
@@ -167,15 +216,14 @@ class WorkdayCalendar : IWorkdayCalendar
             _ => IsRecurringHoliday(dateTime) || holidays.Contains(dateTime.Date) ? new HolidayStrategy() : new DefaultStrategy()
         };
 
-        DateTime incrementedDate = strategy.CalculcateNewWorkday(dateTime, isAdding);
+        DateTime incrementedDate = strategy.CalculcateNewWorkday(dateTime, isPositiveIncrement);
 
         if (incrementedDate != dateTime)
         {
-            return CalculateIncrement(incrementedDate, isAdding);
+            return CalculateIncrement(incrementedDate, isPositiveIncrement);
         }
 
         return incrementedDate;
     }
-
     #endregion
 }
