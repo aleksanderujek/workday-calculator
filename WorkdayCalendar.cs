@@ -19,6 +19,27 @@ class WorkdayCalendar : IWorkdayCalendar
         return false;
     }
 
+    // Consider recursion and pattern matching
+
+    public DateTime CalculateIncrement(DateTime dateTime, bool isAdding)
+    {
+        IDayIncrementStrategy strategy = dateTime.DayOfWeek switch
+        {
+            DayOfWeek.Saturday => new SaturdayStrategy(),
+            DayOfWeek.Sunday => new SundayStrategy(),
+            _ => IsRecurringHoliday(dateTime) || holidays.Contains(dateTime.Date) ? new HolidayStrategy() : new DefaultStrategy()
+        };
+
+        DateTime incrementedDate = strategy.CalculcateNewWorkday(dateTime, isAdding);
+
+        if (incrementedDate != dateTime)
+        {
+            return CalculateIncrement(incrementedDate, isAdding);
+        }
+
+        return incrementedDate;
+    }
+
     public DateTime GetWorkdayIncrement(DateTime startDate, decimal incrementInWorkdays)
     {
 
@@ -27,8 +48,9 @@ class WorkdayCalendar : IWorkdayCalendar
         bool isAdding = incrementInWorkdays > 0;
 
         int minutes = (EndTime - StartTime).Hours * 60 + (EndTime - StartTime).Minutes;
-
+        // Console.WriteLine(minutes);
         decimal fraction = incrementInWorkdays % 1;
+        // Console.WriteLine(fraction);
 
         decimal adjustedMinutes = minutes * fraction;
         // Console.WriteLine(adjustedDateTime.ToString(format));
@@ -44,42 +66,21 @@ class WorkdayCalendar : IWorkdayCalendar
         {
             adjustedDateTime = isAdding ? adjustedDateTime.Date.Add(StartTime).AddDays(1) : adjustedDateTime.Date.Add(EndTime);
         }
-
-        adjustedDateTime = adjustedDateTime.AddMinutes((double)adjustedMinutes);
+        adjustedDateTime = adjustedDateTime.AddMinutes((int)adjustedMinutes);
         // Console.Write(adjustedMinutes);
         // Console.WriteLine(adjustedDateTime.ToString(format));
 
         int daysToAdd = Math.Abs((int)incrementInWorkdays);
         Console.WriteLine(adjustedDateTime.ToString(format));
-        Console.WriteLine("Number of iterations: " + daysToAdd);
+        // Console.WriteLine("Number of iterations: " + daysToAdd);
         for (int i = 0; i < daysToAdd; i++)
         {
             var newDate = adjustedDateTime.AddDays(isAdding ? 1 : -1);
-            Console.WriteLine("-----------");
-            Console.WriteLine("Iteration " + i);
-            Console.WriteLine("Loop Start. Adding 1 day: " + newDate.ToString(format));
-            do
-            {
-                if (newDate.DayOfWeek == DayOfWeek.Saturday)
-                {
-                    newDate = newDate.AddDays(isAdding ? 2 : -1);
-                    Console.WriteLine("It's saturday. Adding 2 days: " + newDate.ToString(format));
-                }
-                else if (newDate.DayOfWeek == DayOfWeek.Sunday)
-                {
-                    newDate = newDate.AddDays(isAdding ? 1 : -2);
-                    Console.WriteLine("It's sunday. Adding 1 day: " + newDate.ToString(format));
-                }
-
-                if (IsRecurringHoliday(newDate) || holidays.Contains(newDate.Date))
-                {
-                    newDate = newDate.AddDays(isAdding ? 1 : -1);
-                    Console.WriteLine("It's holiday. Adding 1 day: " + newDate.ToString(format));
-                    continue;
-                }
-                break;
-            } while (true);
-            Console.WriteLine("Loop End. New value: " + newDate.ToString(format));
+            // Console.WriteLine("-----------");
+            // Console.WriteLine("Iteration " + i);
+            // Console.WriteLine("Loop Start. Adding 1 day: " + newDate.ToString(format));
+            newDate = CalculateIncrement(newDate, isAdding);
+            // Console.WriteLine("Loop End. New value: " + newDate.ToString(format));
             adjustedDateTime = newDate;
         }
 
