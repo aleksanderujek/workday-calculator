@@ -58,17 +58,14 @@ class WorkdayCalendar : IWorkdayCalendar
         if (workDays == 0)
         {
             startDate = CalculateIncrement(startDate, isPositiveIncrement);
+            return startDate;
         }
-        else
+
+        int increment = isPositiveIncrement ? 1 : -1;
+        for (int i = 0; i < workDays; i++)
         {
-            int increment = isPositiveIncrement ? 1 : -1;
-            for (int i = 0; i < workDays; i++)
-            {
-                startDate = CalculateIncrement(startDate.AddDays(increment), isPositiveIncrement);
-            }
+            startDate = CalculateIncrement(startDate.AddDays(increment), isPositiveIncrement);
         }
-
-
         return startDate;
     }
 
@@ -122,6 +119,14 @@ class WorkdayCalendar : IWorkdayCalendar
         return false;
     }
 
+
+    /// <summary>
+    /// Adjusts the work day by incrementing or decrementing the specified <see cref="DateTime"/> value.
+    /// </summary>
+    /// <param name="workDay">The <see cref="DateTime"/> value representing the work day.</param>
+    /// <param name="isPositiveIncrement">A boolean value indicating whether the increment is positive or negative.</param>
+    /// <param name="fraction">The fraction by which to increment or decrement the work day.</param>
+    /// <returns>The adjusted <see cref="DateTime"/> value.</returns>
     private DateTime AdjustWorkDayToIncrementMinutes(DateTime workDay, bool isPositiveIncrement, decimal fraction)
     {
         bool isOutsideWorkingHours = isPositiveIncrement ? (double)fraction > (EndTime - workDay.TimeOfDay).TotalMinutes : Math.Abs((double)fraction) > (workDay.TimeOfDay - StartTime).TotalMinutes;
