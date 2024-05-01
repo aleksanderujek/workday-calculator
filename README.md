@@ -8,4 +8,5 @@ Application allows to define start and end time. Additionally user can define ho
 1. Download [.NET 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) and install it.
 2. Clone repository and open it in preffered IDE (I'm using `VS Code`).
 3. Configure `Program.cs` to define start, end time. Configure as well holidays and recurring holidays.
-4. Run the app using command: `dotnet run`.
+4. Configure in `Program.cs` startDate and increment. You can alter the examples provided in `Program.cs`.
+5. Run the app using command: `dotnet run`.
