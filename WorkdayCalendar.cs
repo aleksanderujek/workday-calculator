@@ -24,10 +24,7 @@ class WorkdayCalendar : IWorkdayCalendar
         TimeSpan startTime = new TimeSpan(startHours, startMinutes, 0);
         TimeSpan endTime = new TimeSpan(stopHours, stopMinutes, 0);
 
-        if (startTime >= endTime)
-        {
-            throw new ArgumentException("Start time must be earlier than end time.");
-        }
+        ValidateStartTimeToEndTime(startTime, endTime);
 
         StartTime = startTime;
         EndTime = endTime;
@@ -53,6 +50,7 @@ class WorkdayCalendar : IWorkdayCalendar
         }
         else
         {
+            ValidateStartTimeToEndTime(StartTime, EndTime);
             workdayMinutes = (EndTime - StartTime).Hours * 60 + (EndTime - StartTime).Minutes;
         }
 
@@ -77,18 +75,17 @@ class WorkdayCalendar : IWorkdayCalendar
 
         startDate = startDate.AddMinutes((int)adjustedMinutes);
 
-        int daysToAdd = Math.Abs((int)incrementInWorkdays);
+        int workDays = Math.Abs((int)incrementInWorkdays);
 
-        if (daysToAdd == 0)
+        if (workDays == 0)
         {
             startDate = CalculateIncrement(startDate, isPositiveIncrement);
         }
 
-        for (int i = 0; i < daysToAdd; i++)
+        int increment = isPositiveIncrement ? 1 : -1;
+        for (int i = 0; i < workDays; i++)
         {
-            var newDate = startDate.AddDays(isPositiveIncrement ? 1 : -1);
-            newDate = CalculateIncrement(newDate, isPositiveIncrement);
-            startDate = newDate;
+            startDate = CalculateIncrement(startDate.AddDays(increment), isPositiveIncrement);
         }
 
         return startDate;
@@ -181,6 +178,19 @@ class WorkdayCalendar : IWorkdayCalendar
         if (minute < 0 || minute > 59)
         {
             throw new ArgumentException($"Invalid {label} minute. {label} minute must be between 0 and 59.");
+        }
+    }
+
+    /// <summary>
+    /// Validates the start time and end time of a workday. Throws an exception if the start time is later than or same as the end time.
+    /// </summary>
+    /// <param name="startTime">The start time of the workday.</param>
+    /// <param name="endTime">The end time of the workday.</param>
+    private void ValidateStartTimeToEndTime(TimeSpan startTime, TimeSpan endTime)
+    {
+        if (startTime >= endTime)
+        {
+            throw new InvalidOperationException("Start time must be earlier than end time.");
         }
     }
 
